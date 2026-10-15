@@ -1,0 +1,5 @@
+"""Small value types."""
+
+from collections import namedtuple
+
+Point = namedtuple("Point", "x y")
