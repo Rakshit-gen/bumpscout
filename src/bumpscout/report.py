@@ -10,6 +10,11 @@ HEADLINE = {
 }
 
 
+def code(text: str) -> str:
+    """An inline code span that survives backticks inside the text."""
+    return f"`` {text} ``" if "`" in text else f"`{text}`"
+
+
 def markdown(v: Verdict, verbose: bool = False) -> str:
     out = [f"# {v.package} {v.current} to {v.version}: {HEADLINE[v.verdict]}", ""]
     if v.reason:
@@ -26,7 +31,7 @@ def markdown(v: Verdict, verbose: bool = False) -> str:
     if v.patch:
         out += ["## Patch", "", "```diff", v.patch.rstrip("\n"), "```", ""]
     if v.evidence:
-        out += ["## Evidence", ""] + [f"- `{e}`" for e in v.evidence] + [""]
+        out += ["## Evidence", ""] + [f"- {code(e)}" for e in v.evidence] + [""]
     if v.notes:
         out += ["## Notes", ""] + [f"- {n}" for n in v.notes] + [""]
     if verbose and v.steps:

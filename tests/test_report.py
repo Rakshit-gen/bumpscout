@@ -29,3 +29,8 @@ def test_blocked_says_what_works():
 
 def test_unknown():
     assert markdown(Verdict("j", "1", "1", "unknown")).startswith("# j 1 to 1: no verdict\n")
+
+
+def test_evidence_with_backticks():
+    v = Verdict("n", "1", "2", "safe", evidence=["- `send_mail` is renamed"])
+    assert "- `` - `send_mail` is renamed ``" in markdown(v)
