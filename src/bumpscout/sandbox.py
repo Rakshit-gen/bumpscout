@@ -28,7 +28,9 @@ class Sandbox:
         if not self.project.is_dir():
             raise ValueError(f"{project} is not a folder")
         self._tmp = tempfile.TemporaryDirectory(prefix="bumpscout-")
-        self.root = Path(self._tmp.name) / self.project.name
+        self.root = (
+            Path(self._tmp.name).resolve() / self.project.name
+        )  # /var is /private/var on macOS
         shutil.copytree(self.project, self.root, ignore=IGNORE)
 
     def close(self) -> None:
@@ -43,7 +45,7 @@ class Sandbox:
     def path(self, rel: str) -> Path:
         """A path inside the copy; refuses anything that escapes it."""
         p = (self.root / rel).resolve()
-        if not p.is_relative_to(self.root.resolve()):
+        if not p.is_relative_to(self.root):
             raise ValueError(f"{rel} is outside the project")
         return p
 

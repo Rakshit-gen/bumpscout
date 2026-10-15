@@ -20,3 +20,11 @@ def test_copy_edit_patch_and_cleanup(tmp_path):
         assert sb.patch() == ""
         root = sb.root
     assert not root.exists()
+
+
+def test_root_is_resolved_so_paths_compare(tmp_path):
+    (tmp_path / "app").mkdir()
+    (tmp_path / "app" / "a.py").write_text("x = 1\n")
+    with Sandbox(tmp_path / "app") as sb:
+        assert sb.root == sb.root.resolve()
+        assert sb.path("a.py").relative_to(sb.root).as_posix() == "a.py"
