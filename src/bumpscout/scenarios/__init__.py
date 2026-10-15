@@ -8,7 +8,6 @@ from pathlib import Path
 from ..env import FixtureEnv, python_of
 from ..index import FixtureIndex
 from ..session import Session
-from ..verdict import VERDICTS
 
 ROOT = Path(__file__).parent
 
