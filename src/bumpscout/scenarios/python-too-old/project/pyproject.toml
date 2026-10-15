@@ -1,0 +1,7 @@
+[project]
+name = "app"
+version = "1.0.0"
+requires-python = ">=3.11"
+dependencies = [
+    "jsonfast==2.3.0",
+]
