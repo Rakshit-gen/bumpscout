@@ -26,6 +26,11 @@ dev = [
 
 [tool.ruff]
 line-length = 100
+# scenario projects and package releases are fixtures, kept as written
+extend-exclude = ["src/bumpscout/scenarios/*/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

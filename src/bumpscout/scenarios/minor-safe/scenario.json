@@ -1,0 +1,9 @@
+{
+  "title": "colorkit 1.2 to 1.4, a minor release",
+  "package": "colorkit",
+  "answer": {
+    "verdict": "safe",
+    "version": "1.4.0",
+    "files": []
+  }
+}
