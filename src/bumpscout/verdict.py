@@ -2,7 +2,7 @@
 
 from dataclasses import asdict, dataclass, field
 
-VERDICTS = ("safe", "needs-changes", "blocked")
+VERDICTS = ("safe", "needs-changes", "blocked", "unknown")  # unknown: a person should look
 
 
 @dataclass

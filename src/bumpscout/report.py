@@ -6,6 +6,7 @@ HEADLINE = {
     "safe": "safe to upgrade",
     "needs-changes": "upgrade needs code changes",
     "blocked": "can't upgrade",
+    "unknown": "no verdict",
 }
 
 
