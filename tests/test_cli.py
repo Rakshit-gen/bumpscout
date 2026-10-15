@@ -29,3 +29,13 @@ def test_eval_exits_1_unless_all_solved(capsys):
 def test_bad_input(capsys):
     assert main(["check", "nope"]) == 2
     assert "no scenario 'nope'" in capsys.readouterr().err
+
+
+def test_model_choice(monkeypatch):
+    from bumpscout.baseline import check
+    from bumpscout.cli import checker
+
+    assert checker(None) is check
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    assert checker(None) is not check and checker("rules") is check
+    assert main(["check", "minor-safe", "--model", "gpt"]) == 2
