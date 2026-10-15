@@ -91,3 +91,11 @@ def test_the_patch_applies_to_the_real_project(tmp_path):
     r = subprocess.run(["git", "apply", str(tmp_path / "fix.patch")], cwd=proj, capture_output=True)
     assert r.returncode == 0, r.stderr
     assert "return render(rows)" in (proj / "src/app/report.py").read_text()
+
+
+def test_the_example_still_runs():
+    import runpy
+    from pathlib import Path
+
+    example = Path(__file__).parent.parent / "examples" / "scripted_run.py"
+    runpy.run_path(str(example), run_name="__main__")
