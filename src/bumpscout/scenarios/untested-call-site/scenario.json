@@ -1,0 +1,11 @@
+{
+  "title": "notifykit 2.0 renames send_mail, called where no test reaches",
+  "package": "notifykit",
+  "answer": {
+    "verdict": "needs-changes",
+    "version": "2.0.0",
+    "files": [
+      "src/app/alerts.py"
+    ]
+  }
+}
