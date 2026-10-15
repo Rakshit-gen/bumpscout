@@ -50,7 +50,7 @@ class FixtureEnv:
         return Outcome(versions, parse(r.stdout + r.stderr, r.returncode))
 
 
-def test_requirements(root: Path) -> list[str]:
+def dev_requirements(root: Path) -> list[str]:
     """Extra packages the tests may need: the dev dependency group and any
     test or dev extras."""
     import tomllib
@@ -86,7 +86,7 @@ class UvEnv:
             r = self._run(["uv", "venv", "--quiet", "--python", self.python, str(venv)], sb.root)
             if r.returncode:
                 raise RuntimeError(f"uv venv failed: {r.stderr.strip()[-500:]}")
-        reqs = [p.text for p in read_pins(sb.root)] + test_requirements(sb.root) + ["pytest"]
+        reqs = [p.text for p in read_pins(sb.root)] + dev_requirements(sb.root) + ["pytest"]
         r = self._run(["uv", "pip", "install", "--quiet", "--python", str(py), *reqs], sb.root)
         if r.returncode:
             err = r.stderr.strip()
