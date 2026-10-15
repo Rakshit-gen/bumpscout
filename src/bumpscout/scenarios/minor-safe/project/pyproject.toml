@@ -3,5 +3,5 @@ name = "app"
 version = "1.0.0"
 requires-python = ">=3.11"
 dependencies = [
-    "colorkit>=1.2,<2",
+    "colorkit==1.2.0",
 ]
