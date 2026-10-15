@@ -1,0 +1,9 @@
+{
+  "title": "strutil 2.0 removes slugify, and the project has its own slugify",
+  "package": "strutil",
+  "answer": {
+    "verdict": "safe",
+    "version": "2.0.0",
+    "files": []
+  }
+}
