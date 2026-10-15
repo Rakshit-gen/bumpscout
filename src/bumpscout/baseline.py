@@ -17,7 +17,8 @@ def check(session: Session, package: str) -> Verdict:
         return Verdict(pin.name, current, current, "safe", f"{current} is the newest release")
 
     def verdict(version, kind, reason, **kw):
-        spec = requirement_text(pin, proposed_spec(pin.spec, version))
+        target = kw.get("fallback", "") if kind == "blocked" else version
+        spec = requirement_text(pin, proposed_spec(pin.spec, target)) if target else ""
         steps = [
             f"try {a.version}: {a.blocked or a.outcome.tests.describe().splitlines()[0]}"
             for a in session.attempts

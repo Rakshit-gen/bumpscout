@@ -25,6 +25,7 @@ def test_needs_changes_points_at_the_file():
 def test_blocked_falls_back_to_the_newest_that_works():
     v = run("python-too-old")
     assert (v.verdict, v.version, v.fallback) == ("blocked", "3.0.0", "2.5.0")
+    assert v.new_spec == "jsonfast==2.5.0"
     assert "Python 3.11" in v.reason
 
 
