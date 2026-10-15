@@ -1,0 +1,31 @@
+[project]
+name = "bumpscout"
+version = "0.1.0"
+description = "An agent that tries a dependency upgrade in a scratch copy of your project, reads the release notes and says what breaks"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "rakshit-gen", email = "sisodiarakshit456@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "packaging>=24",
+]
+
+[project.scripts]
+bumpscout = "bumpscout.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
