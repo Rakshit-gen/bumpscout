@@ -38,3 +38,17 @@ def test_a_version_that_cant_install_is_a_blocked_attempt(tmp_path):
         assert s.try_version("colorkit", "1.0.0").outcome.tests.ok
     finally:
         s.close()
+
+
+def test_newer_releases(tmp_path):
+    make(tmp_path / "index", "colorkit", "1.0.0")
+    make(tmp_path / "index", "colorkit", "1.1.0", yanked=True)
+    make(tmp_path / "index", "colorkit", "1.2.0")
+    project(tmp_path / "app", "colorkit==1.0.0", "pass")
+    idx = FixtureIndex(tmp_path / "index")
+    s = Session(tmp_path / "app", idx, FixtureEnv(idx))
+    try:
+        assert [r.version for r in s.newer("colorkit")] == ["1.2.0"]
+        assert [r.version for r in s.newer("colorkit", yanked=True)] == ["1.1.0", "1.2.0"]
+    finally:
+        s.close()

@@ -4,9 +4,11 @@ results before any change, and every try since."""
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from packaging.version import Version
+
 from .edit import set_pin
 from .env import Outcome, python_of
-from .index import Index
+from .index import Index, Release
 from .pins import Pin, find, read_pins
 from .resolve import ResolutionError
 from .results import TestRun
@@ -50,6 +52,15 @@ class Session:
         if p.name not in self.before.versions:
             raise ValueError(f"{package} isn't installed for Python {self.python}")
         return self.before.versions[p.name]
+
+    def newer(self, package: str, yanked: bool = False) -> list[Release]:
+        """Releases after the installed one, oldest first; yanked ones only if asked."""
+        now = Version(self.installed(package))
+        return [
+            r
+            for r in self.index.releases(package)
+            if Version(r.version) > now and (yanked or not r.yanked)
+        ]
 
     def code_patch(self) -> str:
         """Changes to the copy other than dependency files."""
