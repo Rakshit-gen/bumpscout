@@ -8,7 +8,7 @@ def test_proposed_spec_keeps_the_style():
     assert proposed_spec(">=1.2,<2", "2.1.0") == ">=2.1.0,<3"
     assert proposed_spec(">=1.2,<3", "2.1.0") == ">=2.1.0,<3"
     assert proposed_spec(">=1.2,!=1.5.0", "1.6") == ">=1.6,!=1.5.0"
-    assert proposed_spec("~=1.2", "2.0") == ">=2.0"
+    assert proposed_spec("~=1.2", "2.0") == ">=2.0,<3"
 
 
 def test_set_pin_keeps_extras_and_markers(tmp_path):

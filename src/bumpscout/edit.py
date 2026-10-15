@@ -12,14 +12,17 @@ from .pins import Pin
 def proposed_spec(old: str, version: str) -> str:
     """The specifier to suggest for moving to `version`, in the style of the
     old one: an exact pin stays exact; otherwise the lower bound moves up and
-    an upper bound that would exclude the new version moves to its next major."""
+    an upper bound that would exclude the new version moves to its next major.
+    `~=` becomes a cap at the next major."""
     v = Version(version)
     specs = list(SpecifierSet(old))
     if not specs or any(s.operator in ("==", "===") for s in specs):
         return f"=={v}" if specs else f">={v}"
     out = [f">={v}"]
     for s in specs:
-        if s.operator in ("<", "<="):
+        if s.operator == "~=":  # a compatible-release cap, kept as a major cap
+            out.append(f"<{v.major + 1}")
+        elif s.operator in ("<", "<="):
             out.append(f"<{v.major + 1}" if not s.contains(v) else str(s))
         elif s.operator == "!=":
             out.append(str(s))
