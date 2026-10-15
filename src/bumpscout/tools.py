@@ -2,6 +2,10 @@
 answer is kept so the conclusion's evidence can be checked against it. All
 changes happen in the scratch copy."""
 
+from packaging.version import Version
+
+from .notes import combined
+from .search import search
 from .session import Session
 
 CAP = 1500
@@ -11,10 +15,10 @@ def _cap(text: str) -> str:
     return text if len(text) <= CAP else text[:CAP] + f"\n[... {len(text) - CAP} more characters]"
 
 
-def _schema(name: str, description: str, **props) -> dict:
+def _schema(tool: str, description: str, **props) -> dict:
     required = [k for k, v in props.items() if not v.pop("optional", False)]
     return {
-        "name": name,
+        "name": tool,
         "description": description,
         "parameters": {"type": "object", "properties": props, "required": required},
     }
@@ -30,6 +34,25 @@ SCHEMAS = [
         "versions",
         "Releases of the package newer than the installed one, with the Python they need, "
         "what they depend on and whether they were yanked.",
+    ),
+    _schema(
+        "release_notes",
+        "Release notes for every release after the installed one up to `version` "
+        "(default: the newest), newest first.",
+        version={"type": "string", "optional": True},
+    ),
+    _schema(
+        "search_code",
+        "Lines in the project's Python files, tests included, that use a name as a whole word. "
+        "At most 30.",
+        name={"type": "string", "description": "e.g. render_table or tablet.render_table"},
+    ),
+    _schema(
+        "read_file",
+        "Numbered lines of a project file in the scratch copy.",
+        path={"type": "string"},
+        start={"type": "integer", "optional": True},
+        end={"type": "integer", "optional": True},
     ),
 ]
 
@@ -72,3 +95,21 @@ class Tools:
                 bits.append("YANKED")
             rows.append("  ".join(bits))
         return "\n".join(rows) or "no newer releases"
+
+    def tool_release_notes(self, version: str | None = None) -> str:
+        releases = self.s.newer(self.package, yanked=True)
+        if version:
+            releases = [r for r in releases if Version(r.version) <= Version(version)]
+        if not releases:
+            return "no releases in that range"
+        return combined(releases)
+
+    def tool_search_code(self, name: str) -> str:
+        hits = search(self.s.sandbox.root, name, limit=30)
+        return "\n".join(str(h) for h in hits) or f"{name!r} doesn't appear in the project"
+
+    def tool_read_file(self, path: str, start: int = 1, end: int | None = None) -> str:
+        lines = self.s.sandbox.path(path).read_text().splitlines()
+        lo = max(1, int(start))
+        hi = min(len(lines), int(end) if end else lo + 79)
+        return "\n".join(f"{i}: {lines[i - 1]}" for i in range(lo, hi + 1)) or "(empty)"

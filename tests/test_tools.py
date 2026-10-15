@@ -39,3 +39,19 @@ def test_cap():
     from bumpscout.tools import _cap
 
     assert _cap("x" * (CAP + 5)).endswith("[... 5 more characters]")
+
+
+@pytest.mark.parametrize("tools", ["renamed-function"], indirect=True)
+def test_notes_search_and_read(tools):
+    notes = tools.call("release_notes", {})
+    assert notes.index("## 2.0.1") < notes.index("## 2.0.0")
+    assert "2.0.1" not in tools.call("release_notes", {"version": "2.0.0"})
+    assert tools.call("search_code", {"name": "render_table"}).splitlines() == [
+        "src/app/report.py:1: from tablet import render_table",
+        "src/app/report.py:6: return render_table(rows)",
+    ]
+    assert "doesn't appear" in tools.call("search_code", {"name": "nothing_here"})
+    assert tools.call("read_file", {"path": "src/app/report.py", "start": 6, "end": 6}) == (
+        "6:     return render_table(rows)"
+    )
+    assert tools.call("read_file", {"path": "../../etc/passwd"}).startswith("error:")
