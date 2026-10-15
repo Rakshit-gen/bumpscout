@@ -49,3 +49,21 @@ def test_pytest_output_and_passing_runs():
 def test_a_crash_shows_the_last_lines():
     r = parse("Traceback (most recent call last):\nImportError: boom\n", 1)
     assert "ImportError: boom" in r.describe()
+
+
+def test_pytest_collection_error_gets_its_message():
+    out = (
+        "____ ERROR collecting tests/test_v.py ____\n"
+        "tests/test_v.py:1: in <module>\n"
+        "E   ImportError: cannot import name 'LegacyVersion' from 'packaging.version'\n"
+        "=== short test summary info ===\n"
+        "ERROR tests/test_v.py\n"
+        "1 error in 0.03s\n"
+    )
+    r = parse(out, 2)
+    assert r.failures == [
+        (
+            "tests/test_v.py",
+            "ImportError: cannot import name 'LegacyVersion' from 'packaging.version'",
+        )
+    ]
