@@ -45,3 +45,24 @@ def test_write_patch_needs_a_patch(tmp_path, capsys):
     out = tmp_path / "fix.patch"
     assert main(["check", "renamed-function", "--write-patch", str(out)]) == 1
     assert not out.exists() and "no patch" in capsys.readouterr().err
+
+
+def test_a_folder_needs_a_package(tmp_path, capsys):
+    assert main(["check", str(tmp_path)]) == 2
+    assert "name the dependency" in capsys.readouterr().err
+
+
+def test_a_folder_uses_pypi_and_uv(tmp_path, monkeypatch):
+    from bumpscout import cli
+
+    seen = {}
+
+    class FakeSession:
+        def __init__(self, project, index, env):
+            seen.update(index=type(index).__name__, env=type(env).__name__, python=env.python)
+
+    monkeypatch.setattr("bumpscout.session.Session", FakeSession)
+    (tmp_path / "pyproject.toml").write_text('[project]\nrequires-python = ">=3.12"\n')
+    s, package = cli.session_for(str(tmp_path), "tablet")
+    assert package == "tablet"
+    assert seen == {"index": "PyPIIndex", "env": "UvEnv", "python": "3.12"}

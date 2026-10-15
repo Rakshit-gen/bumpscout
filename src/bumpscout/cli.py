@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from . import __version__, evals, scenarios
 from .baseline import check as rules
@@ -40,11 +41,28 @@ def cmd_scenarios(args) -> int:
     return 0
 
 
+def session_for(target: str, package: str | None):
+    """(session, package) for a scenario name or a project folder."""
+    if Path(target).is_dir():
+        from .env import UvEnv, python_of
+        from .pypi import PyPIIndex
+        from .session import Session
+
+        if not package:
+            raise ValueError("name the dependency to upgrade: bumpscout check PATH PACKAGE")
+        print(f"running {target}'s tests with uv...", file=sys.stderr, flush=True)
+        return Session(Path(target), PyPIIndex(), UvEnv(python_of(target))), package
+    sc = scenarios.load(target)
+    return sc.session(), package or sc.package
+
+
 def cmd_check(args) -> int:
-    sc = scenarios.load(args.target)
-    s = sc.session()
+    check = checker(args.model, args.budget, args.verbose)
+    s, package = session_for(args.target, args.package)
     try:
-        v = checker(args.model, args.budget, args.verbose)(s, args.package or sc.package)
+        if not s.before.tests.ok:
+            print(f"note: before any change, {s.before.tests.describe()}", file=sys.stderr)
+        v = check(s, package)
     finally:
         s.close()
     print(json.dumps(v.to_dict(), indent=2) if args.json else markdown(v, args.verbose), end="")
@@ -76,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("scenarios", help="list the built-in upgrades").set_defaults(fn=cmd_scenarios)
 
     c = sub.add_parser("check", help="check one upgrade")
-    c.add_argument("target", help="a scenario name")
+    c.add_argument("target", help="a scenario name, or a project folder")
     c.add_argument("package", nargs="?", help="the dependency to upgrade")
     c.add_argument(
         "--write-patch", metavar="FILE", help="save the code changes (apply with git apply)"
@@ -100,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         return args.fn(args)
-    except ValueError as err:
+    except (ValueError, RuntimeError) as err:
         print(f"bumpscout: {err}", file=sys.stderr)
         return 2
 
