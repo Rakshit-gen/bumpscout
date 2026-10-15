@@ -39,3 +39,9 @@ def test_model_choice(monkeypatch):
     monkeypatch.setenv("GROQ_API_KEY", "k")
     assert checker(None) is not check and checker("rules") is check
     assert main(["check", "minor-safe", "--model", "gpt"]) == 2
+
+
+def test_write_patch_needs_a_patch(tmp_path, capsys):
+    out = tmp_path / "fix.patch"
+    assert main(["check", "renamed-function", "--write-patch", str(out)]) == 1
+    assert not out.exists() and "no patch" in capsys.readouterr().err

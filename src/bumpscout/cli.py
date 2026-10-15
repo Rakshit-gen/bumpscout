@@ -48,6 +48,13 @@ def cmd_check(args) -> int:
     finally:
         s.close()
     print(json.dumps(v.to_dict(), indent=2) if args.json else markdown(v, args.verbose), end="")
+    if args.write_patch:
+        if not v.patch:
+            print("bumpscout: no patch to write", file=sys.stderr)
+            return 1
+        with open(args.write_patch, "w") as f:
+            f.write(v.patch)
+        print(f"wrote the code changes to {args.write_patch}", file=sys.stderr)
     return 0
 
 
@@ -71,6 +78,9 @@ def main(argv: list[str] | None = None) -> int:
     c = sub.add_parser("check", help="check one upgrade")
     c.add_argument("target", help="a scenario name")
     c.add_argument("package", nargs="?", help="the dependency to upgrade")
+    c.add_argument(
+        "--write-patch", metavar="FILE", help="save the code changes (apply with git apply)"
+    )
     c.set_defaults(fn=cmd_check)
 
     e = sub.add_parser("eval", help="score every scenario (exit 1 unless all are solved)")
