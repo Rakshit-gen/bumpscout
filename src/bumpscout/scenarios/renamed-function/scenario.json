@@ -1,0 +1,11 @@
+{
+  "title": "tablet 1.x to 2.0, which renames render_table",
+  "package": "tablet",
+  "answer": {
+    "verdict": "needs-changes",
+    "version": "2.0.1",
+    "files": [
+      "src/app/report.py"
+    ]
+  }
+}
