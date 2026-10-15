@@ -33,6 +33,12 @@ def test_unittest_output():
     assert "tests failed: 2 of 3 ran" in r.describe()
 
 
+def test_unittest_summary_line_is_not_a_failure():
+    out = "E\n" + "=" * 70 + "\nERROR: test_a (t.T.test_a)\n" + "-" * 70 + "\nKeyError: 1\n\n"
+    r = parse(out + "-" * 70 + "\nRan 1 test in 0.0s\n\nFAILED (errors=1)\n", 1)
+    assert r.failures == [("T.test_a", "KeyError: 1")]
+
+
 def test_pytest_output_and_passing_runs():
     r = parse("FAILED tests/test_a.py::test_x - assert 1 == 2\n1 failed, 4 passed in 0.2s\n", 1)
     assert r.ran == 5 and r.failures == [("tests/test_a.py::test_x", "assert 1 == 2")]

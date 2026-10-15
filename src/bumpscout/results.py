@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 SEP = "=" * 70
 UNITTEST_HEAD = re.compile(r"^(FAIL|ERROR): (\S+) \(([^)]+)\)")
 UNITTEST_RAN = re.compile(r"^Ran (\d+) tests? in")
-PYTEST_LINE = re.compile(r"^(FAILED|ERROR) (\S+)(?: - (.*))?$")
+PYTEST_LINE = re.compile(r"^(FAILED|ERROR) (?!\()(\S+)(?: - (.*))?$")  # not "FAILED (errors=1)"
 PYTEST_COUNTS = re.compile(r"(\d+) (passed|failed|errors?)\b")
 
 
