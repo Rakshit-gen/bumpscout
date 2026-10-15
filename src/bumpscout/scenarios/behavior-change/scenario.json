@@ -1,0 +1,11 @@
+{
+  "title": "retryer 2.0, where retry stops retrying by default",
+  "package": "retryer",
+  "answer": {
+    "verdict": "needs-changes",
+    "version": "2.0.0",
+    "files": [
+      "src/app/client.py"
+    ]
+  }
+}
