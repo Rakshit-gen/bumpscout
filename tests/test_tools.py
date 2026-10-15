@@ -55,3 +55,11 @@ def test_notes_search_and_read(tools):
         "6:     return render_table(rows)"
     )
     assert tools.call("read_file", {"path": "../../etc/passwd"}).startswith("error:")
+
+
+@pytest.mark.parametrize("tools", ["transitive-conflict"], indirect=True)
+def test_try_upgrade(tools):
+    out = tools.call("try_upgrade", {"version": "3.0.0"})
+    assert out.startswith("3.0.0 can't be installed") and "routekit 3.0.0 needs shapes>=2" in out
+    out = tools.call("try_upgrade", {"version": "2.4.0"})
+    assert out == "installed: routekit 2.4.0, shapes 1.1.0 (no code edits)\ntests passed (1 ran)"

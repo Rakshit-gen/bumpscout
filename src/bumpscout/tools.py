@@ -54,6 +54,12 @@ SCHEMAS = [
         start={"type": "integer", "optional": True},
         end={"type": "integer", "optional": True},
     ),
+    _schema(
+        "try_upgrade",
+        "Pin the package to exactly `version` in the scratch copy, install and run the tests. "
+        "Code edits made so far stay in place.",
+        version={"type": "string"},
+    ),
 ]
 
 
@@ -113,3 +119,11 @@ class Tools:
         lo = max(1, int(start))
         hi = min(len(lines), int(end) if end else lo + 79)
         return "\n".join(f"{i}: {lines[i - 1]}" for i in range(lo, hi + 1)) or "(empty)"
+
+    def tool_try_upgrade(self, version: str) -> str:
+        a = self.s.try_version(self.package, version)
+        installed = ", ".join(f"{k} {v}" for k, v in sorted(a.outcome.versions.items()))
+        if a.blocked:
+            return f"{version} can't be installed: {a.blocked}"
+        edits = "with your code edits" if a.patched else "no code edits"
+        return f"installed: {installed} ({edits})\n{a.outcome.tests.describe()}"
