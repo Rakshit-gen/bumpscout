@@ -1,0 +1,11 @@
+{
+  "title": "datekit 3.1 deprecates parse() without fmt; the tests make warnings errors",
+  "package": "datekit",
+  "answer": {
+    "verdict": "needs-changes",
+    "version": "3.1.0",
+    "files": [
+      "src/app/billing.py"
+    ]
+  }
+}
