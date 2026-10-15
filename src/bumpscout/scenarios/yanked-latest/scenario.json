@@ -1,0 +1,9 @@
+{
+  "title": "pathkit 1.6.1 was yanked; 1.6.0 is the one to take",
+  "package": "pathkit",
+  "answer": {
+    "verdict": "safe",
+    "version": "1.6.0",
+    "files": []
+  }
+}
