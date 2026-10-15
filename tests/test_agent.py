@@ -70,3 +70,24 @@ def test_one_retry_on_a_bad_reply_then_unknown():
 def test_parse_conclusion():
     v = parse_conclusion(done(version="2.0", files="a.py", evidence="x"), "p", "1.0")
     assert (v.files, v.evidence) == (["a.py"], ["x"])
+
+
+def test_the_patch_applies_to_the_real_project(tmp_path):
+    import shutil
+    import subprocess
+
+    path = "src/app/report.py"
+    v, _ = run(
+        "renamed-function",
+        [
+            [call("edit_file", 0, path=path, old="import render_table", new="import render")],
+            [call("edit_file", 1, path=path, old="return render_table(", new="return render(")],
+            done(verdict="needs-changes", version="2.0.1"),
+        ],
+    )
+    assert v.files == ["src/app/report.py"]
+    proj = shutil.copytree(scenarios.load("renamed-function").project, tmp_path / "p")
+    (tmp_path / "fix.patch").write_text(v.patch)
+    r = subprocess.run(["git", "apply", str(tmp_path / "fix.patch")], cwd=proj, capture_output=True)
+    assert r.returncode == 0, r.stderr
+    assert "return render(rows)" in (proj / "src/app/report.py").read_text()
