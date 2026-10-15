@@ -8,6 +8,8 @@ from .edit import set_pin
 from .env import Outcome, python_of
 from .index import Index
 from .pins import Pin, find, read_pins
+from .resolve import ResolutionError
+from .results import TestRun
 from .sandbox import Sandbox
 
 
@@ -17,6 +19,7 @@ class Attempt:
     version: str
     outcome: Outcome
     patched: bool  # did the copy have code changes beyond the pin?
+    blocked: str = ""  # why it couldn't be installed, if it couldn't
 
 
 @dataclass
@@ -65,7 +68,11 @@ class Session:
         p = self.pin(package)
         current = find(read_pins(self.sandbox.root), p.name)
         set_pin(self.sandbox.root, current, f"=={version}")
-        outcome = self.env.run_tests(self.sandbox)
-        a = Attempt(p.name, version, outcome, bool(self.code_patch()))
+        try:
+            outcome, blocked = self.env.run_tests(self.sandbox), ""
+        except ResolutionError as e:
+            blocked = str(e)
+            outcome = Outcome({}, TestRun(1, f"not installed: {blocked}"))
+        a = Attempt(p.name, version, outcome, bool(self.code_patch()), blocked)
         self.attempts.append(a)
         return a

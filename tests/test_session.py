@@ -24,3 +24,17 @@ def test_try_versions_and_keep_code_edits(tmp_path):
         assert (tmp_path / "app" / "tests" / "test_app.py").read_text().count('"1.0.0"') == 1
     finally:
         s.close()
+
+
+def test_a_version_that_cant_install_is_a_blocked_attempt(tmp_path):
+    make(tmp_path / "index", "colorkit", "1.0.0")
+    make(tmp_path / "index", "colorkit", "2.0.0", requires_python=">=3.99")
+    project(tmp_path / "app", "colorkit<2", "pass")
+    idx = FixtureIndex(tmp_path / "index")
+    s = Session(tmp_path / "app", idx, FixtureEnv(idx))
+    try:
+        a = s.try_version("colorkit", "2.0.0")
+        assert "fits Python" in a.blocked and not a.outcome.tests.ok
+        assert s.try_version("colorkit", "1.0.0").outcome.tests.ok
+    finally:
+        s.close()
