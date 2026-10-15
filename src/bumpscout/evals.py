@@ -16,12 +16,13 @@ class Score:
     verdict: bool  # right call
     version: bool  # about the right version (and the right fallback when blocked)
     files: bool  # the files that need changes, no more, no fewer
+    fix: bool  # when changes are needed: came with a patch to those files
     harmful: bool  # called it safe when it isn't
     result: Verdict | None = None
 
     @property
     def solved(self) -> bool:
-        return self.verdict and self.version and self.files
+        return self.verdict and self.version and self.files and self.fix
 
 
 def score(answer: dict, v: Verdict, name: str = "") -> Score:
@@ -33,6 +34,8 @@ def score(answer: dict, v: Verdict, name: str = "") -> Score:
         v.verdict == answer["verdict"],
         version,
         set(v.files) == set(answer.get("files", [])),
+        answer["verdict"] != "needs-changes"
+        or bool(v.patch and all(f"--- a/{f}" in v.patch for f in answer["files"])),
         v.verdict == "safe" and answer["verdict"] != "safe",
         v,
     )
@@ -53,10 +56,11 @@ def run(checker: Checker, names: list[str] | None = None) -> list[Score]:
 def table(scores: list[Score]) -> str:
     mark = {True: "yes", False: "-"}
     w = max([len("scenario")] + [len(s.name) for s in scores])
-    lines = [f"{'scenario':<{w}}  verdict  version  files  harmful"]
+    lines = [f"{'scenario':<{w}}  verdict  version  files  fix  harmful"]
     for s in scores:
         lines.append(
             f"{s.name:<{w}}  {mark[s.verdict]:<7}  {mark[s.version]:<7}  {mark[s.files]:<5}"
+            f"  {mark[s.fix]:<3}"
             f"  {'YES' if s.harmful else '-'}"
         )
     solved = sum(s.solved for s in scores)
