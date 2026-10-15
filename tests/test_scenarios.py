@@ -1,7 +1,7 @@
 import pytest
 
 from bumpscout import scenarios
-from bumpscout.scenarios import VERDICTS
+from bumpscout.verdict import VERDICTS
 
 
 @pytest.mark.parametrize("name", scenarios.names())
