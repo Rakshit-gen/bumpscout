@@ -60,6 +60,16 @@ SCHEMAS = [
         "Code edits made so far stay in place.",
         version={"type": "string"},
     ),
+    _schema(
+        "edit_file",
+        "Replace one exact piece of text in a project file in the scratch copy. `old` must "
+        "appear exactly once. Tests and dependency files can't be edited: change the code, "
+        "and use try_upgrade for versions.",
+        path={"type": "string"},
+        old={"type": "string"},
+        new={"type": "string"},
+    ),
+    _schema("show_patch", "Your code edits so far, as a unified diff."),
 ]
 
 
@@ -127,3 +137,20 @@ class Tools:
             return f"{version} can't be installed: {a.blocked}"
         edits = "with your code edits" if a.patched else "no code edits"
         return f"installed: {installed} ({edits})\n{a.outcome.tests.describe()}"
+
+    def tool_edit_file(self, path: str, old: str, new: str) -> str:
+        target = self.s.sandbox.path(path)
+        rel = target.relative_to(self.s.sandbox.root).as_posix()
+        if rel.startswith("tests/") or "/tests/" in rel or target.name.startswith("test_"):
+            raise ValueError("tests can't be edited; make the code pass them")
+        if rel in {p.source for p in self.s.pins}:
+            raise ValueError(f"{rel} holds the dependencies; use try_upgrade to change versions")
+        text = target.read_text()
+        n = text.count(old) if old else 0
+        if n != 1:
+            raise ValueError(f"`old` appears {n} times in {rel}; it must appear exactly once")
+        target.write_text(text.replace(old, new, 1))
+        return f"edited {rel}"
+
+    def tool_show_patch(self) -> str:
+        return self.s.code_patch() or "no code edits yet"

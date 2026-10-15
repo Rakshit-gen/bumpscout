@@ -63,3 +63,26 @@ def test_try_upgrade(tools):
     assert out.startswith("3.0.0 can't be installed") and "routekit 3.0.0 needs shapes>=2" in out
     out = tools.call("try_upgrade", {"version": "2.4.0"})
     assert out == "installed: routekit 2.4.0, shapes 1.1.0 (no code edits)\ntests passed (1 ran)"
+
+
+@pytest.mark.parametrize("tools", ["renamed-function"], indirect=True)
+def test_edit_then_try(tools):
+    edit = {"path": "src/app/report.py", "old": "render_table", "new": "render"}
+    assert "appears 2 times" in tools.call("edit_file", edit)
+    for old in ("import render_table", "return render_table("):
+        e = {**edit, "old": old, "new": old.replace("render_table", "render")}
+        assert tools.call("edit_file", e) == "edited src/app/report.py"
+    patch = tools.call("show_patch", {})
+    assert "-from tablet import render_table" in patch and "+    return render(rows)" in patch
+    assert tools.call("try_upgrade", {"version": "2.0.1"}).endswith(
+        "(with your code edits)\ntests passed (1 ran)"
+    )
+
+
+@pytest.mark.parametrize("tools", ["renamed-function"], indirect=True)
+def test_tests_and_pins_are_off_limits(tools):
+    t = {"path": "tests/test_report.py", "old": "east", "new": "x"}
+    assert "tests can't be edited" in tools.call("edit_file", t)
+    p = {"path": "pyproject.toml", "old": "tablet", "new": "x"}
+    assert "use try_upgrade" in tools.call("edit_file", p)
+    assert tools.call("show_patch", {}) == "no code edits yet"
