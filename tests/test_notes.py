@@ -11,6 +11,12 @@ def test_changed_names():
     assert changed_names("- Faster `dumps`.\n") == []
 
 
+def test_bare_names_in_github_style_notes():
+    line = "* Drop `LegacySpecifier` and LegacyVersion by @pradyunsg in https://github.com/x/y_z/pull/407"
+    assert changed_names(line) == ["LegacySpecifier", "LegacyVersion"]
+    assert changed_names("- Removed load_ini and the old Config class.") == ["load_ini"]
+
+
 def test_combined_is_newest_first_with_headings():
     rs = [Release("1.1.0", notes="- fix"), Release("1.2.0", notes="## 1.2.0\n- add x")]
     assert combined(rs) == "## 1.2.0\n- add x\n\n## 1.1.0\n- fix"

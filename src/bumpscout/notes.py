@@ -5,7 +5,12 @@ import re
 from .index import Release
 
 TICKED = re.compile(r"`([A-Za-z_][\w.]*)(?:\(\))?`")
-GONE = re.compile(r"\b(remov\w*|renam\w*|is now|deprecat\w*|gone|no longer|dropp\w*)\b", re.I)
+GONE = re.compile(
+    r"\b(remov\w*|renam\w*|is now|deprecat\w*|gone|no longer|drop\w*|delet\w*)\b", re.I
+)
+# Names written without backticks: CamelCase with an inner capital, or snake_case.
+BARE = re.compile(r"(?<![\w.@/])([A-Za-z]+[a-z][A-Z]\w*|[A-Za-z]\w*_\w+)(?![\w/])")
+URL = re.compile(r"https?://\S+")
 
 
 def changed_names(notes: str) -> list[str]:
@@ -15,7 +20,8 @@ def changed_names(notes: str) -> list[str]:
     out: list[str] = []
     for line in notes.splitlines():
         if GONE.search(line):
-            for name in TICKED.findall(line):
+            bare = BARE.findall(TICKED.sub(" ", URL.sub(" ", line)))
+            for name in TICKED.findall(line) + bare:
                 if name not in out:
                     out.append(name)
     return out
