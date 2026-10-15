@@ -1,0 +1,9 @@
+{
+  "title": "confkit 2 to 3, which drops INI support",
+  "package": "confkit",
+  "answer": {
+    "verdict": "safe",
+    "version": "3.0.0",
+    "files": []
+  }
+}
